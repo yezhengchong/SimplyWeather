@@ -181,13 +181,13 @@ public class Utility {
 
     //保存天气信息
     private static boolean saveWeatherInfo(Context context, String cityName, String weather,
-                                           String temperture, String date) {
+                                           String temperature, String date) {
         SharedPreferences.Editor editor = PreferenceManager
                                           .getDefaultSharedPreferences(context).edit();
         editor.putBoolean("city_selected", true);
         editor.putString("city_name", cityName);
         editor.putString("weather", weather);
-        editor.putString("temperature", temperture);
+        editor.putString("temperature", temperature);
         editor.putString("date", date);
         editor.commit();
         return false;
