@@ -1,5 +1,8 @@
 package com.yzc.simplyweather.util;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.JsonReader;
 
 import com.yzc.simplyweather.db.SimplyWeatherDB;
@@ -7,6 +10,10 @@ import com.yzc.simplyweather.model.City;
 import com.yzc.simplyweather.model.District;
 import com.yzc.simplyweather.model.Province;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -132,6 +139,57 @@ public class Utility {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
+    }
+
+    //处理天气
+    public static boolean handleWeatherResponse(Context context, InputStream in) {
+        LogUtil.d("Utility", "handleWeatherResponse");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        String line;
+        StringBuilder response = new StringBuilder();
+        try {
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            return parseWeatherInfo(context, response.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    //解析天气信息
+    private static boolean parseWeatherInfo(Context context, String data) {
+        try {
+            JSONObject response = new JSONObject(data);
+            String resultCode = response.getString("resultcode");
+            if (resultCode.equals("200")) {
+                JSONObject result = response.getJSONObject("result");
+                JSONObject today = result.getJSONObject("today");
+                String temperature = today.getString("temperature");
+                String cityName = today.getString("city");
+                String weather = today.getString("weather");
+                String date = today.getString("date_y");
+                return saveWeatherInfo(context, cityName, weather, temperature, date);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    //保存天气信息
+    private static boolean saveWeatherInfo(Context context, String cityName, String weather,
+                                           String temperture, String date) {
+        SharedPreferences.Editor editor = PreferenceManager
+                                          .getDefaultSharedPreferences(context).edit();
+        editor.putBoolean("city_selected", true);
+        editor.putString("city_name", cityName);
+        editor.putString("weather", weather);
+        editor.putString("temperature", temperture);
+        editor.putString("date", date);
+        editor.commit();
         return false;
     }
 }
