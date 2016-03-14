@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.yzc.simplyweather.R;
+import com.yzc.simplyweather.service.AutoUpdateService;
 import com.yzc.simplyweather.util.HttpCallbackListener;
 import com.yzc.simplyweather.util.HttpUtil;
 import com.yzc.simplyweather.util.Utility;
@@ -126,5 +127,7 @@ public class WeatherActivity extends Activity implements View.OnClickListener{
         weatherDespText.setText(prefs.getString("weather", ""));
         temperature.setText(prefs.getString("temperature", ""));
         currentDateText.setText(prefs.getString("date", ""));
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 }
