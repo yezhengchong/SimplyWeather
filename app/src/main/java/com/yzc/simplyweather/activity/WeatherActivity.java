@@ -1,11 +1,14 @@
 package com.yzc.simplyweather.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.yzc.simplyweather.R;
@@ -19,7 +22,7 @@ import java.net.URLEncoder;
 /**
  * Created by yzc on 2016/3/14.
  */
-public class WeatherActivity extends Activity {
+public class WeatherActivity extends Activity implements View.OnClickListener{
 
     //用于显示城市名
     private TextView cityNameText;
@@ -33,6 +36,12 @@ public class WeatherActivity extends Activity {
     //用于显示当前日期
     private TextView currentDateText;
 
+    //切换城市按钮
+    private Button switchCity;
+
+    //更新天气按钮
+    private Button refreshWeather;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +53,10 @@ public class WeatherActivity extends Activity {
         weatherDespText = (TextView) findViewById(R.id.weather_desp);
         temperature = (TextView) findViewById(R.id.temperature);
         currentDateText = (TextView) findViewById(R.id.current_date);
+        switchCity = (Button) findViewById(R.id.switch_city);
+        refreshWeather = (Button) findViewById(R.id.refresh_weather);
+        switchCity.setOnClickListener(this);
+        refreshWeather.setOnClickListener(this);
 
         String districtName = getIntent().getStringExtra("district_name");
         if (!TextUtils.isEmpty(districtName)) {
@@ -52,7 +65,30 @@ public class WeatherActivity extends Activity {
         } else {
             showWeather();
         }
+
     }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.switch_city:
+                Intent intent = new Intent(this, ChooseAreaActivity.class);
+                intent.putExtra("from_weather_activity", true);
+                startActivity(intent);
+                finish();
+                break;
+            case R.id.refresh_weather:
+                weatherDespText.setText("同步中");
+                SharedPreferences preferences = PreferenceManager
+                        .getDefaultSharedPreferences(this);
+                String districtName = preferences.getString("district_name", "");
+                queryWeather(districtName);
+                break;
+            default:
+                break;
+        }
+    }
+
     private void queryWeather(String name) {
         try {
             String address = "http://v.juhe.cn/weather/index?format=2&cityname=" +
